@@ -1,4 +1,4 @@
-# chatbot/models.py
+# bot/models.py
 from django.db import models
 
 class KnowledgeBaseFile(models.Model):

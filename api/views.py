@@ -1,4 +1,4 @@
-from django.shortcuts import render
+# api/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,9 +8,6 @@ from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda
 from langchain.schema import AIMessage
 from .serializers import ChatResponseSerializer
-
-# chatbot/views.py
-
 
 class ChatbotAPI(APIView):
     def post(self, request, *args, **kwargs):
