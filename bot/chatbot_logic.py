@@ -1,4 +1,4 @@
-# chatbot/chatbot_logic.py
+# bot/chatbot_logic.py
 import os
 from openai import OpenAI
 
@@ -38,30 +38,6 @@ def update_knowledge_base(vector_store, file_path):
         print(f"Knowledge base updated with file: {file_path}")
     else:
         print("Error: Only .txt files are supported.")
-
-
-# # Define the LLM and chain for generating the image prompt
-# llm = OpenAI(temperature=0.9)
-# prompt = PromptTemplate(
-#     input_variables=["image_desc"],
-#     template="Generate a detailed prompt to generate an image based on the following description: {image_desc}",
-# )
-# chain = LLMChain(llm=llm, prompt=prompt)
-#
-# # Function to generate an image URL using DALL-E
-# def generate_dalle_image(query):
-#     try:
-#         # Shorten the prompt if it's too long
-#         max_prompt_length = 1000
-#         if len(query) > max_prompt_length:
-#             query = query[:max_prompt_length]
-#
-#         # Use the DALL-E wrapper to generate an image based on the prompt
-#         image_url = DallEAPIWrapper().run(chain.run(query))
-#         return image_url
-#     except Exception as e:
-#         print(f"Error generating DALL-E image: {e}")
-#         return None
 
 client = OpenAI()
 
