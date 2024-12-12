@@ -8,6 +8,7 @@ from langchain_chroma.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain_openai.chat_models import ChatOpenAI
 from django.conf import settings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 # Configure OpenAI API key
@@ -18,7 +19,12 @@ def load_knowledge_base(folder_path):
     for file_name in os.listdir(folder_path):
         if file_name.endswith(".txt"):
             loader = TextLoader(os.path.join(folder_path, file_name), encoding="utf-8")
-            documents.extend(loader.load())
+            raw_documents = loader.load()
+
+            # Split large documents into smaller chunks
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+            documents.extend(text_splitter.split_documents(raw_documents))
+
     embeddings = OpenAIEmbeddings()
     vector_store = Chroma.from_documents(
         documents, embeddings, persist_directory="media/chroma_store"
@@ -31,13 +37,38 @@ def create_rag_chain(vector_store):
     return RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
 
 def update_knowledge_base(vector_store, file_path):
+    """
+    Updates the vector store with new documents from the given file.
+
+    Parameters:
+    - vector_store: The Chroma vector store instance.
+    - file_path: Path to the file containing new documents.
+
+    Notes:
+    - Only .txt files are supported.
+    - The new document is split into smaller chunks before being added to the vector store.
+    """
     if file_path.endswith(".txt"):
-        loader = TextLoader(file_path, encoding="utf-8")
-        new_documents = loader.load()
-        vector_store.add_documents(new_documents)
-        print(f"Knowledge base updated with file: {file_path}")
+        try:
+            loader = TextLoader(file_path, encoding="utf-8")
+            raw_documents = loader.load()
+
+            # Split the document into smaller chunks
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+            new_documents = text_splitter.split_documents(raw_documents)
+
+            # Add the new documents to the vector store
+            vector_store.add_documents(new_documents)
+
+            # Optionally persist changes to disk
+            vector_store.persist()
+
+            print(f"Knowledge base successfully updated with file: {file_path}")
+        except Exception as e:
+            print(f"Error updating knowledge base: {str(e)}")
     else:
         print("Error: Only .txt files are supported.")
+
 
 client = OpenAI()
 
