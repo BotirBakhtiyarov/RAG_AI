@@ -2,17 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    {% load static %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'icons/myicon.ico' %}" type="image/x-icon">
     <title>Chatbot</title>
     <style>
-        /* Same CSS styles as before */
         body {
             font-family: Arial, sans-serif;
             margin: 25px;
             padding: 0;
             display: flex;
             flex-direction: column;
-            height: 90vh;
+            height: 94vh;
         }
 
         h1 {
@@ -51,21 +52,13 @@
             padding: 10px;
             background-color: white;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        #chat-form1 {
-            padding: 10px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         #query {
-            width: 95%;
+            width: 94%;
             padding: 10px;
             font-size: 14px;
             border: 0px solid #ccc;
@@ -94,10 +87,59 @@
         button:hover {
             background-color: #0056b3;
         }
+
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #007BFF;
+            border-radius: 50%;
+            animation: blink 1.4s infinite both;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Code Block Styling */
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin-top: 10px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-    <h1>Chat with our Intelligent Bot!</h1>
+    <h1>工一机器人</h1>
 
     <div id="chat-container">
         <!-- Chat responses will be dynamically added here -->
@@ -110,11 +152,8 @@
             <option value="chatgpt">ChatGPT-4</option>
             <option value="dall-e">Dall-E</option>
         </select>
-        <div class="chat-form1"></div>
-        <textarea name="query" id="query" placeholder="Ask me anything..." required style="height: 150px"></textarea>
-
-            <button type="submit">↑</button>
-        </div>
+        <input type="text" name="query" id="query" placeholder="Ask me anything..." required style="height: 50px;">
+        <button type="submit">↑</button>
     </form>
 
     <script>
@@ -134,20 +173,34 @@
             // Clear input field
             document.getElementById("query").value = "";
 
-            // Send the query to the backend
-            const response = await fetch("/chat/", {
-                method: "POST",
-                body: new URLSearchParams({
-                    'query': query,
-                    'llm': llm
-                }),
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            });
+            // Add a typing animation placeholder
+            const typingMessage = addTypingAnimation();
 
-            const result = await response.json();
-            addMessage(result.response, "bot");
+            // Send the query to the backend
+            try {
+                const response = await fetch("/", {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        'query': query,
+                        'llm': llm
+                    }),
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+
+                const result = await response.json();
+
+                // Remove the typing animation
+                removeTypingAnimation(typingMessage);
+
+                // Display the bot's response
+                addMessage(result.response, "bot");
+            } catch (error) {
+                // Handle errors (e.g., network issue)
+                removeTypingAnimation(typingMessage);
+                addMessage("Sorry, something went wrong. Please try again.", "bot");
+            }
         });
 
         function addMessage(message, sender) {
@@ -155,14 +208,18 @@
             messageElement.classList.add("message");
             messageElement.classList.add(sender === "user" ? "user-message" : "bot-message");
 
-            if (message.includes('<img src=')) {
+            if (message.includes("```")) {
+                const codeContent = message.split("```")[1];
+                const preElement = document.createElement("pre");
+                const codeElement = document.createElement("code");
+                codeElement.textContent = codeContent.trim();
+                preElement.appendChild(codeElement);
+                messageElement.appendChild(preElement);
+            } else if (message.includes('<img src=')) {
                 const imageElement = document.createElement("img");
-                const imageUrl = message.split("src='")[1].split("'")[0]; // Extract image URL
+                const imageUrl = message.split("src='")[1].split("'")[0];
                 imageElement.src = imageUrl;
-
-                // Set the image size (you can adjust the width and height as needed)
-                imageElement.style.height = '300px'; // Example height
-
+                imageElement.style.height = '300px';
                 messageElement.appendChild(imageElement);
             } else {
                 messageElement.textContent = message;
@@ -170,6 +227,25 @@
 
             responseDiv.appendChild(messageElement);
             responseDiv.scrollTop = responseDiv.scrollHeight;
+        }
+
+        function addTypingAnimation() {
+            const typingMessage = document.createElement("div");
+            typingMessage.classList.add("message", "bot-message");
+            typingMessage.innerHTML = `
+                <span class="typing-indicator">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </span>
+            `;
+            responseDiv.appendChild(typingMessage);
+            responseDiv.scrollTop = responseDiv.scrollHeight;
+            return typingMessage;
+        }
+
+        function removeTypingAnimation(typingMessage) {
+            responseDiv.removeChild(typingMessage);
         }
     </script>
 </body>
