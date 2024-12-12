@@ -1,0 +1,38 @@
+Shaxsiy Ma'lumotlar:
+To‘liq ismi: Botir Bakhtiyarov
+Tug‘ilgan sana: 1999-yil 3-may
+Nikoh: 2024-yil 20-iyulda turmush qurgan
+Tug‘ilgan joy: Chinoz tumani, Toshkent viloyati
+Manzil: Xitoy, Kunming
+Ta'lim:
+Kunming University of Science and Technology (KUST):
+Kompyuter fanlari bo‘yicha bakalavr (2020-yil sentabr – 2025-yil iyul)
+Yunnan Minzu University:
+Xitoy tili va adabiyoti (2018-yil noyabr – 2020-yil yanvar)
+Ish tajribasi:
+Hozirgi lavozim:
+Kompaniya: 工一(云南)数字科技有限公司
+Lavozim: Dasturiy injener, Cloud Solutions mutaxassisi
+Oldingi tajribalar:
+Dyninno Group: GDS mutaxassisi (2022-yil dekabr – 2023-yil avgust)
+Bright Star Education:
+Ingliz tili o‘qituvchisi (2021-yil iyul – 2022-yil may)
+Dasturlash tilini o‘rgatish o‘qituvchisi (2021-yil yanvar – 2022-yil mart)
+Star Media: Foto muharrir (2016-yil avgust – 2018-yil iyul)
+Kontakt ma'lumotlari:
+Mobil telefon: +86 131 1621 7571
+Email: botirbakhtiyarovb@gmail.com
+Telegram: @BakhtiyarovBotir
+WeChat: nick_2620
+LinkedIn: www.linkedin.com/in/botirbakhtiyarov-856a83243
+Instagram: @botir.bakhtiyarov
+YouTube: youtube.com/@botirbakhtiyarov
+Qiziqish va loyihalar:
+YouTube’da texnologiyalar haqida kontent yaratish va Instagram’da blog yuritish.
+Docker, Django, va boshqa dasturiy texnologiyalarni o‘rganish.
+Yoshlarni ilmga qiziqtirish va jamiyat bilan birlashishga qaratilgan loyihalar.
+Clonezilla va virtual kompyuter xizmatlarini o‘rganish va rivojlantirish.
+Loyihalar:
+Django asosida "AutoInstaller" loyihasi: Foydalanuvchilar ilovalarni yuklab olish va o‘rnatish imkoniyatiga ega bo‘ladi.
+Flask va Docker asosida serverni boshqarish.
+Virtual bulutli Windows kompyuter xizmati, ayniqsa ta'lim muassasalariga yo‘naltirilgan.

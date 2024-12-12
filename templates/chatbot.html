@@ -2,102 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    {% load static %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'icons/myicon.png' %}" type="image/x-icon">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>Chatbot</title>
-    <style>
-        /* Same CSS styles as before */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 25px;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 90vh;
-        }
-
-        h1 {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        #chat-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            overflow-y: auto;
-            max-height: calc(100vh - 160px);
-        }
-
-        .message {
-            background-color: #f1f1f1;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            max-width: 80%;
-        }
-
-        .user-message {
-            background-color: #d1e7ff;
-            align-self: flex-start;
-        }
-
-        .bot-message {
-            background-color: #e0f7fa;
-            align-self: flex-end;
-        }
-
-        #chat-form {
-            padding: 10px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        #chat-form1 {
-            padding: 10px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #query {
-            width: 95%;
-            padding: 10px;
-            font-size: 14px;
-            border: 0px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #llm-selector {
-            width: 9%;
-            padding: 10px;
-            font-size: 14px;
-            border: 0px solid #ccc;
-            border-radius: 5px;
-        }
-
-        button {
-            width: 50px;
-            height: 50px;
-            padding: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
 </head>
 <body>
-    <h1>Chat with our Intelligent Bot!</h1>
+    <h1>工一机器人</h1>
 
     <div id="chat-container">
         <!-- Chat responses will be dynamically added here -->
@@ -106,15 +18,12 @@
     <form method="POST" id="chat-form">
         {% csrf_token %}
         <select id="llm-selector" name="llm">
-            <option value="base_knowledge">GongYi</option>
+            <option value="base_knowledge">Personal</option>
             <option value="chatgpt">ChatGPT-4</option>
             <option value="dall-e">Dall-E</option>
         </select>
-        <div class="chat-form1"></div>
-        <textarea name="query" id="query" placeholder="Ask me anything..." required style="height: 150px"></textarea>
-
-            <button type="submit">↑</button>
-        </div>
+        <input type="text" name="query" id="query" placeholder="Ask me anything..." required style="height: 50px;">
+        <button type="submit">↑</button>
     </form>
 
     <script>
@@ -134,20 +43,34 @@
             // Clear input field
             document.getElementById("query").value = "";
 
-            // Send the query to the backend
-            const response = await fetch("/chat/", {
-                method: "POST",
-                body: new URLSearchParams({
-                    'query': query,
-                    'llm': llm
-                }),
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            });
+            // Add a typing animation placeholder
+            const typingMessage = addTypingAnimation();
 
-            const result = await response.json();
-            addMessage(result.response, "bot");
+            // Send the query to the backend
+            try {
+                const response = await fetch("/", {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        'query': query,
+                        'llm': llm
+                    }),
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+
+                const result = await response.json();
+
+                // Remove the typing animation
+                removeTypingAnimation(typingMessage);
+
+                // Display the bot's response
+                addMessage(result.response, "bot");
+            } catch (error) {
+                // Handle errors (e.g., network issue)
+                removeTypingAnimation(typingMessage);
+                addMessage("Sorry, something went wrong. Please try again.", "bot");
+            }
         });
 
         function addMessage(message, sender) {
@@ -155,14 +78,18 @@
             messageElement.classList.add("message");
             messageElement.classList.add(sender === "user" ? "user-message" : "bot-message");
 
-            if (message.includes('<img src=')) {
+            if (message.includes("```")) {
+                const codeContent = message.split("```")[1];
+                const preElement = document.createElement("pre");
+                const codeElement = document.createElement("code");
+                codeElement.textContent = codeContent.trim();
+                preElement.appendChild(codeElement);
+                messageElement.appendChild(preElement);
+            } else if (message.includes('<img src=')) {
                 const imageElement = document.createElement("img");
-                const imageUrl = message.split("src='")[1].split("'")[0]; // Extract image URL
+                const imageUrl = message.split("src='")[1].split("'")[0];
                 imageElement.src = imageUrl;
-
-                // Set the image size (you can adjust the width and height as needed)
-                imageElement.style.height = '300px'; // Example height
-
+                imageElement.style.height = '300px';
                 messageElement.appendChild(imageElement);
             } else {
                 messageElement.textContent = message;
@@ -170,6 +97,25 @@
 
             responseDiv.appendChild(messageElement);
             responseDiv.scrollTop = responseDiv.scrollHeight;
+        }
+
+        function addTypingAnimation() {
+            const typingMessage = document.createElement("div");
+            typingMessage.classList.add("message", "bot-message");
+            typingMessage.innerHTML = `
+                <span class="typing-indicator">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </span>
+            `;
+            responseDiv.appendChild(typingMessage);
+            responseDiv.scrollTop = responseDiv.scrollHeight;
+            return typingMessage;
+        }
+
+        function removeTypingAnimation(typingMessage) {
+            responseDiv.removeChild(typingMessage);
         }
     </script>
 </body>
